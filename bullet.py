@@ -8,7 +8,7 @@ class Bullet(Sprite):
         """Create a bullet object at the ship's current position"""
         super().__init__()
         self.screen = ai_game.screen
-        self.setting = ai_game.settings
+        self.settings = ai_game.settings
         self.color = self.settings.bullet_color
         
         # Create a bullet rect at (0,0) and then set correct position.
