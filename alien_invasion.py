@@ -26,6 +26,15 @@ class AlienInvasion:
             self._check_events()
             self.ship.update()
             self.bullets.update()
+            
+            # Get rid of the bullets that have disappeared
+            for bullet in self.bullets.copy():
+                if bullet.rect.bottom <= 0:
+                    self.bullets.remove(bullet)
+            # Verify the number of bullets being decreased
+            # print(len(self.bullets))
+            
+            
             self._update_screen()
             self.clock.tick(60)
             
