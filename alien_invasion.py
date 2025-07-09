@@ -68,6 +68,7 @@ class AlienInvasion:
             # Destroy exiting bullets and create a new fleet.
             self.bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
     
     def _update_aliens(self):
         """Check if the fleet is at an adge and Update the positions of 
