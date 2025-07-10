@@ -114,6 +114,8 @@ class AlienInvasion:
             
             # Reset the game statistics
             self.stats.reset_stats()
+            self.sb.prep_score()
+            # self.sb.prep_score()
             self.game_active = True
             
             # Get rid of any remaining bullets and aliens.
@@ -214,7 +216,7 @@ class AlienInvasion:
         for alien in self.aliens.sprites():
             if alien.rect.bottom >= self.settings.screen_height:
                 # Treat this same as the ship got hiy
-                self.ship_hit()
+                self._ship_hit()
                 break
                     
         
