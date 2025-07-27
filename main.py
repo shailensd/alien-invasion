@@ -1,5 +1,6 @@
 import sys
 import pygame
+import asyncio
 from time import sleep
 
 from settings import Settings
