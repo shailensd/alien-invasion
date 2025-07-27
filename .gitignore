@@ -1,17 +1,74 @@
-# Python cache files
+# ========================================
+# Python
+# ========================================
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.log
 
-# Virtual Environment
-env/
+# Virtual Environments
 venv/
+env/
+.venv/
+ENV/
+*.env
 
-# Editor specific files
-.vscode/
-.idea/
-
-# macOS/Windows hidden files
-.DS_Store
+# Local config
+*.local
+*.DS_Store
+*.swp
+*.bak
 Thumbs.db
 
+# ========================================
+# Pygame / Game Assets
+# ========================================
+*.bmp
+*.png
+*.wav
+*.ogg
+*.mp3
+
+# ========================================
+# Pygbag / Web Build Artifacts
+# ========================================
+build/
+.webcache/
+*.wasm
+*.js
+*.html
+*.data
+pygbag.toml
+
+# ========================================
+# Git / GitHub
+# ========================================
+*.orig
+*.patch
+*.rej
+
+# ========================================
+# Editors & IDEs
+# ========================================
+.vscode/
+.idea/
+*.code-workspace
+
+# ========================================
+# Azure Static Web Apps (optional, local tooling)
+# ========================================
+.azure/
+
+# ========================================
+# Logs & Temp Files
+# ========================================
+*.log
+*.tmp
+*.cache
+
+
+
 tempCodeRunnerFile.py
+

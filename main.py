@@ -41,7 +41,7 @@ class AlienInvasion:
         # Make the Play Button
         self.play_button = Button(self, "Play")
         
-    def run_game(self):
+    async def run_game(self):
         """Start the main loop for the game."""
         while True:
             # Watch for keyboard and mouse events.
@@ -52,6 +52,8 @@ class AlienInvasion:
                 self._update_aliens()
             self._update_screen()
             self.clock.tick(60)
+            await asyncio.sleep(0)
+
             
     def _update_bullets(self):
         """Update bullet positions and get rid of old bullets."""
@@ -250,8 +252,13 @@ class AlienInvasion:
         pygame.display.flip()
 
 # Only run the following code, if file is being run directly
-if __name__ == '__main__':
+async def main():
+    """Main function to run the game."""
     # Make a game instance and run the game.
     ai = AlienInvasion()
-    ai.run_game()    
+    await ai.run_game()
+
+if __name__ == '__main__':
+    # Make a game instance and run the game.
+    asyncio.run(main())    
         
