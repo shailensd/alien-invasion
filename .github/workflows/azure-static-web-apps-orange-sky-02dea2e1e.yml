@@ -31,7 +31,7 @@ jobs:
           pip install pygbag pygame
       
       - name: Build with Pygbag
-        run: pygbag main.py
+        run: pygbag --build .
       
       - name: Build And Deploy
         id: builddeploy
