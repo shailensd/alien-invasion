@@ -33,6 +33,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install pygbag pygame
       
+      - name: Build with Pygbag
+        run: pygbag --build .
+        timeout-minutes: 10
+      
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       
@@ -55,7 +59,7 @@ jobs:
           api_location: ""
           output_location: "build/web"
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          app_build_command: "pip install pygbag pygame && pygbag --build ."
+          skip_app_build: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
