@@ -27,7 +27,23 @@ class Bullet(Sprite):
         self.rect.y = self.y
         
     def draw_bullet(self):
-        """Draw the bullet to the screen."""
+        """Draw bullet with glow effect."""
+        # Draw outer glow (slightly larger, dimmer)
+        glow_rect = pygame.Rect(
+            self.rect.x - 1, self.rect.y - 1,
+            self.rect.width + 2, self.rect.height + 2
+        )
+        glow_color = (0, 200, 150)  # Dimmer cyan
+        pygame.draw.rect(self.screen, glow_color, glow_rect)
+        
+        # Draw main bullet
         pygame.draw.rect(self.screen, self.color, self.rect)
+        
+        # Draw bright tip (white highlight)
+        tip_rect = pygame.Rect(
+            self.rect.x, self.rect.y,
+            self.rect.width, 4
+        )
+        pygame.draw.rect(self.screen, (255, 255, 255), tip_rect)
             
         

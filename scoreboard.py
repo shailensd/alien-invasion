@@ -15,7 +15,7 @@ class Scoreboard:
         self.stats = ai_game.stats
         
         # Font settings for scoring information.
-        self.text_color  = (30, 30, 30)
+        self.text_color  = (100, 255, 200)  # Bright cyan
         self.font = pygame.font.SysFont(None, 48)
         
         # Prepare the initial score image.
@@ -29,22 +29,36 @@ class Scoreboard:
         rounded_score = round(self.stats.score, -1)
         score_str = f"Score: {rounded_score:,}" # format specifier- thousand separator
         self.score_image = self.font.render(score_str, True, 
-                                    self.text_color, self.settings.bg_color)
+                                    self.text_color, None)
         # Display the score at the top right of the screen.
         self.score_rect = self.score_image.get_rect()
         self.score_rect.right = self.screen_rect.right - 20
         self.score_rect.top = 20
+        # Create panel behind score
+        self.score_panel = pygame.Rect(
+            self.score_rect.left - 10,
+            self.score_rect.top - 5,
+            self.score_rect.width + 20,
+            self.score_rect.height + 10
+        )
     
     def prep_high_score(self):
         """Turn the high score into a rendered image"""
         high_score = round(self.stats.high_score, -1)
         high_score_str = f"High Score: {high_score:,}"
         self.high_score_image = self.font.render(high_score_str, True, 
-                                    self.text_color, self.settings.bg_color)
+                                    self.text_color, None)
         # Center the high score at the top of the screen
         self.high_score_rect = self.high_score_image.get_rect()
         self.high_score_rect.centerx = self.screen_rect.centerx
         self.high_score_rect.top = self.score_rect.top
+        # Create panel behind high score
+        self.high_score_panel = pygame.Rect(
+            self.high_score_rect.left - 10,
+            self.high_score_rect.top - 5,
+            self.high_score_rect.width + 20,
+            self.high_score_rect.height + 10
+        )
     
     def check_high_score(self):
         """Check to see if there is a new high score"""
@@ -55,12 +69,18 @@ class Scoreboard:
     def prep_level(self):
         """Turn the level into a rendered image"""
         level_str = f"Level: {str(self.stats.level)}"
-        self.level_image = self.font.render(level_str, True, self.text_color,
-                                        self.settings.bg_color)
+        self.level_image = self.font.render(level_str, True, self.text_color, None)
         # Position the level below the score
         self.level_rect = self.level_image.get_rect()
         self.level_rect.right = self.score_rect.right
-        self.level_rect.top = self.score_rect.bottom + 10        
+        self.level_rect.top = self.score_rect.bottom + 10
+        # Create panel behind level
+        self.level_panel = pygame.Rect(
+            self.level_rect.left - 10,
+            self.level_rect.top - 5,
+            self.level_rect.width + 20,
+            self.level_rect.height + 10
+        )        
     
     def prep_ships(self):
         """Show how many ships are left"""
@@ -72,7 +92,15 @@ class Scoreboard:
             self.ships.add(ship)  
               
     def show_score(self):
-        """Draw scores and level and ships to the screen"""
+        """Draw scores and level and ships to the screen with panels"""
+        # Draw semi-transparent black panels behind text
+        # Use dark gray for panels (pygame doesn't support RGBA in draw.rect directly)
+        panel_color = (0, 0, 0)  # Solid black - works well on dark background
+        pygame.draw.rect(self.screen, panel_color, self.score_panel)
+        pygame.draw.rect(self.screen, panel_color, self.high_score_panel)
+        pygame.draw.rect(self.screen, panel_color, self.level_panel)
+        
+        # Draw text
         self.screen.blit(self.score_image, self.score_rect)
         self.screen.blit(self.high_score_image, self.high_score_rect)
         self.screen.blit(self.level_image, self.level_rect)   

@@ -5,16 +5,20 @@ class Settings:
         # Screen settings
         self.screen_width = 1200
         self.screen_height = 700
-        self.bg_color = (230, 230, 230)
+        self.bg_color = (15, 15, 35)  # Dark space blue
+        
+        # Starfield settings
+        self.star_color = (255, 255, 255)
+        self.star_count = 100
         
         # Ship settings
         self.ship_limit = 3
         
         # Bullet settings
         self.bullet_speed = 2.5
-        self.bullet_width = 3
-        self.bullet_height = 15
-        self.bullet_color = (60, 60, 60)
+        self.bullet_width = 4  # Slightly wider
+        self.bullet_height = 20  # Taller
+        self.bullet_color = (0, 255, 200)  # Bright cyan/teal
         self.bullets_allowed = 5
         
         # Alien settings

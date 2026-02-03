@@ -10,6 +10,7 @@ from alien import Alien
 from game_stats import GameStats
 from button import Button
 from scoreboard import Scoreboard
+from explosion import Explosion
 
 class AlienInvasion:
     """Overall class to manage game assets and behavior. """
@@ -32,6 +33,7 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self.explosions = pygame.sprite.Group()
         
         self._create_fleet()
         
@@ -39,7 +41,14 @@ class AlienInvasion:
         self.game_active = False
         
         # Make the Play Button
-        self.play_button = Button(self, "Play")
+        self.play_button = Button(self, "Play") 
+        # Create starfield for background
+        self.stars = []
+        self._create_starfield()
+        
+        # Fonts for title and game over screens
+        self.title_font = pygame.font.SysFont(None, 72)
+        self.subtitle_font = pygame.font.SysFont(None, 36)
         
     async def run_game(self):
         """Start the main loop for the game."""
@@ -50,6 +59,7 @@ class AlienInvasion:
                 self.ship.update()
                 self._update_bullets()
                 self._update_aliens()
+                self._update_explosions()
             self._update_screen()
             self.clock.tick(60)
             await asyncio.sleep(0)
@@ -75,6 +85,10 @@ class AlienInvasion:
         
         if collisions:
             for aliens in collisions.values():
+                for alien in aliens:
+                    # Create explosion at alien position
+                    explosion = Explosion(self, alien.rect.centerx, alien.rect.centery)
+                    self.explosions.add(explosion)
                 self.stats.score += self.settings.alien_points
             self.sb.prep_score()
             self.sb.check_high_score()
@@ -88,6 +102,13 @@ class AlienInvasion:
             # Increase level
             self.stats.level += 1
             self.sb.prep_level()
+    
+    def _update_explosions(self):
+        """Update explosion particles"""
+        for explosion in self.explosions.copy():
+            explosion.update()
+            if not explosion.is_alive():
+                self.explosions.remove(explosion)
     
     def _update_aliens(self):
         """Check if the fleet is at an adge and Update the positions of 
@@ -230,22 +251,106 @@ class AlienInvasion:
                 # Treat this same as the ship got hit
                 self._ship_hit()
                 break
-                    
+    
+    def _create_starfield(self):
+        """Create a starfield background"""
+        import random
+        for _ in range(self.settings.star_count):
+            x = random.randint(0, self.settings.screen_width)
+            y = random.randint(0, self.settings.screen_height)
+            brightness = random.randint(100, 255)
+            self.stars.append([x, y, brightness])
+    
+    def _draw_starfield(self):
+        """Draw the starfield background"""
+        for star in self.stars:
+            pygame.draw.circle(self.screen, (star[2], star[2], star[2]), 
+                             (star[0], star[1]), 1)
+    
+    def _draw_title_screen(self):
+        """Draw title screen"""
+        # Title
+        title_text = self.title_font.render("ALIEN INVASION", True, (100, 255, 200))
+        title_rect = title_text.get_rect(center=(self.settings.screen_width // 2, 
+                                                 self.settings.screen_height // 2 - 100))
+        self.screen.blit(title_text, title_rect)
+        
+        # High score if available
+        if self.stats.high_score > 0:
+            subtitle_text = self.subtitle_font.render(
+                f"High Score: {self.stats.high_score:,}", 
+                True, (255, 255, 255))
+            subtitle_rect = subtitle_text.get_rect(
+                center=(self.settings.screen_width // 2, 
+                       self.settings.screen_height // 2 - 30))
+            self.screen.blit(subtitle_text, subtitle_rect)
+        
+        # Instructions
+        instruction_text = self.subtitle_font.render(
+            "Use ARROWS to move, SPACE to shoot", 
+            True, (200, 200, 200))
+        instruction_rect = instruction_text.get_rect(
+            center=(self.settings.screen_width // 2, 
+                   self.settings.screen_height // 2 + 50))
+        self.screen.blit(instruction_text, instruction_rect)
+    
+    def _draw_game_over(self):
+        """Draw game over screen"""
+        # Game Over text
+        game_over_text = self.title_font.render("GAME OVER", True, (255, 100, 100))
+        game_over_rect = game_over_text.get_rect(
+            center=(self.settings.screen_width // 2, 
+                   self.settings.screen_height // 2 - 100))
+        self.screen.blit(game_over_text, game_over_rect)
+        
+        # Final score
+        final_score_text = self.subtitle_font.render(
+            f"Final Score: {self.stats.score:,}", 
+            True, (255, 255, 255))
+        final_score_rect = final_score_text.get_rect(
+            center=(self.settings.screen_width // 2, 
+                   self.settings.screen_height // 2 - 30))
+        self.screen.blit(final_score_text, final_score_rect)
+        
+        # High score if new
+        if self.stats.score == self.stats.high_score:
+            new_record_text = self.subtitle_font.render(
+                "NEW HIGH SCORE!", 
+                True, (100, 255, 100))
+            new_record_rect = new_record_text.get_rect(
+                center=(self.settings.screen_width // 2, 
+                       self.settings.screen_height // 2 + 20))
+            self.screen.blit(new_record_text, new_record_rect)
         
     def _update_screen(self):
         """Update images on the screen, and flip to the new screen"""
         # Redraw the screen during each pass through the loop.
         self.screen.fill(self.settings.bg_color)
-        for bullet in self.bullets.sprites():
-            bullet.draw_bullet()
-        self.ship.blitme()
-        self.aliens.draw(self.screen)
+        
+        # Draw starfield background
+        self._draw_starfield()
+        
+        # Draw game elements only when game is active
+        if self.game_active:
+            for bullet in self.bullets.sprites():
+                bullet.draw_bullet()
+            self.ship.blitme()
+            self.aliens.draw(self.screen)
+            # Draw explosions
+            for explosion in self.explosions:
+                explosion.draw()
         
         # Draw the score information
         self.sb.show_score()
         
-        #Draw the play button if the game is inactive
+        # Draw title screen or game over screen if game is inactive
         if not self.game_active:
+            if self.stats.ship_left == 0 and self.stats.score > 0:
+                # Game Over screen
+                self._draw_game_over()
+            else:
+                # Title screen
+                self._draw_title_screen()
             self.play_button.draw_button()
             
         # Make the most recently drawn screen visible.
