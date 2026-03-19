@@ -11,11 +11,17 @@ from game_stats import GameStats
 from button import Button
 from scoreboard import Scoreboard
 from explosion import Explosion
+from audio import SFX
 
 class AlienInvasion:
     """Overall class to manage game assets and behavior. """
     def __init__(self):
         """Initialize the game, and create game resources."""
+        # Improve mixer stability/latency when available
+        try:
+            pygame.mixer.pre_init(44100, -16, 1, 512)
+        except Exception:
+            pass
         pygame.init()
         self.clock = pygame.time.Clock()
         self.settings = Settings()
@@ -42,6 +48,11 @@ class AlienInvasion:
         
         # Make the Play Button
         self.play_button = Button(self, "Play") 
+
+        # Sound effects (graceful fallback if audio can't init)
+        self.sfx = SFX(enabled=self.settings.sound_enabled, volume=self.settings.sound_volume)
+        self.sfx.init()
+
         # Create starfield for background
         self.stars = []
         self._create_starfield()
@@ -84,6 +95,7 @@ class AlienInvasion:
             self.bullets, self.aliens, True, True)
         
         if collisions:
+            self.sfx.play(self.sfx.hit)
             for aliens in collisions.values():
                 for alien in aliens:
                     # Create explosion at alien position
@@ -98,6 +110,7 @@ class AlienInvasion:
             self.bullets.empty()
             self._create_fleet()
             self.settings.increase_speed()
+            self.sfx.play(self.sfx.level_up)
             
             # Increase level
             self.stats.level += 1
@@ -139,6 +152,7 @@ class AlienInvasion:
         """Start a new game when the player clicks Play"""
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.game_active:
+            self.sfx.play(self.sfx.start)
             # Reset the game settings.
             self.settings.initialize_dynamic_settings()
             
@@ -170,6 +184,8 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             sys.exit()
+        elif event.key == pygame.K_m:
+            self.sfx.toggle()
         elif event.key == pygame.K_SPACE:
             self.fire_bullet()
             
@@ -185,6 +201,7 @@ class AlienInvasion:
         if len(self.bullets) < self.settings.bullets_allowed:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
+            self.sfx.play(self.sfx.shoot)
 
     def _create_fleet(self):
         """Create the fleet of aliens"""
@@ -226,6 +243,7 @@ class AlienInvasion:
     def _ship_hit(self):
         """Respond to the ship being hit by an alien."""
         if self.stats.ship_left > 0 :
+            self.sfx.play(self.sfx.ship_hit)
             # Decrement ships left, and update scoreboard.
             self.stats.ship_left -= 1
             self.sb.prep_ships()
@@ -242,6 +260,7 @@ class AlienInvasion:
             sleep(0.5)
         else: 
             self.game_active = False
+            self.sfx.play(self.sfx.game_over)
             pygame.mouse.set_visible(True)
             
     def _check_alien_bottom(self):
